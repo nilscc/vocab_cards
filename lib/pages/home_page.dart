@@ -1,49 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab/cards/box.dart';
 import 'package:vocab/cards/box_collection.dart';
-import 'package:vocab/routes/add_box_route.dart';
 import 'package:vocab/widgets/box_collection.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomePage extends MaterialPage {
+  HomePage({ValueChanged<Box>? onBoxSelected,}) : super(
+    child: _Widget(onBoxSelected: onBoxSelected),
+  );
+}
+
+class _Widget extends StatelessWidget {
+  final ValueChanged<Box>? onBoxSelected;
+
+  const _Widget({this.onBoxSelected, Key? key,}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Vocab Cards")),
-      body: _boxCollection(context),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(AddBoxRoute());
-        },
-      ),
-    );
-  }
-
-  Widget _boxCollection(BuildContext context) => FutureBuilder<BoxCollection>(
+  Widget build(BuildContext context) => FutureBuilder(
         // load box collection from json file
         future: BoxCollection.load(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            // show data in main box collection widget
             return ChangeNotifierProvider.value(
               value: snapshot.data as BoxCollection,
-              child: const BoxCollectionWidget(),
+              builder: (context, child) => _mainScaffold(context),
             );
           } else {
-            // show information about loading progress
-            return ListView(
-              children: [
-                Card(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    child: const Text("Loading main box collection..."),
+            return Scaffold(
+              appBar: _appBar(),
+              // show information about loading progress
+              body: ListView(
+                children: [
+                  Card(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: const Text("Loading main box collection..."),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           }
         },
       );
+
+  Widget _mainScaffold(BuildContext context) => Scaffold(
+        appBar: _appBar(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: BoxCollectionWidget(onBoxSelected: onBoxSelected),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async {
+            final bc = Provider.of<BoxCollection>(context, listen: false);
+            final name = await _addBoxDialog(context);
+            if (name?.isNotEmpty == true) {
+              bc.add(Box(name: name!));
+              await bc.save();
+            }
+          },
+        ),
+      );
+
+  AppBar _appBar() => AppBar(title: const Text("Vocab Cards"));
+
+  Future<String?> _addBoxDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text("New Box"),
+        children: [
+          Container(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              bottom: 20,
+            ),
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: "Name of the new box",
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextButton(
+                    child: const Text("Discard"),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+                ElevatedButton(
+                  child: const Text("Add"),
+                  onPressed: () {
+                    Navigator.of(context).pop(controller.text);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -15,7 +15,6 @@ void main() {
     // encode as JSON and decode back into object
     final encoded = collection.toJson();
     final decoded = BoxCollection.fromJson(encoded);
-    print(decoded);
 
     expect(const DeepCollectionEquality().equals(decoded.boxes, collection.boxes), isTrue);
   });

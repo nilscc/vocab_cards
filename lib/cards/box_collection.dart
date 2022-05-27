@@ -11,9 +11,9 @@ class BoxCollection extends ChangeNotifier {
   BoxCollection({List<Box>? boxes}) : boxes = boxes ?? [];
 
   static Future<String> _defaultPath() async => join(
-      (await getApplicationDocumentsDirectory()).path,
-  "box_collection_main.json",
-  );
+        (await getApplicationDocumentsDirectory()).path,
+        "box_collection_main.json",
+      );
 
   static Future<BoxCollection> load({String? path}) async {
     path ??= await _defaultPath();
@@ -23,7 +23,9 @@ class BoxCollection extends ChangeNotifier {
 
     // check if file exists
     if (f.existsSync()) {
-      return BoxCollection.fromJson(jsonDecode(File(path).readAsStringSync()));
+      final s = f.readAsStringSync();
+      final j = jsonDecode(s);
+      return BoxCollection.fromJson(j);
     } else {
       return BoxCollection();
     }
@@ -45,7 +47,8 @@ class BoxCollection extends ChangeNotifier {
         "boxes": boxes,
       };
 
-  BoxCollection.fromJson(Map<String, dynamic> map) : boxes = map["boxes"];
+  BoxCollection.fromJson(Map<String, dynamic> map)
+      : boxes = (map["boxes"] as List).map((e) => Box.fromJson(e)).toList();
 
   @override
   String toString() => 'BoxCollection(boxes: $boxes)';
