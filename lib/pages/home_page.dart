@@ -2,25 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/cards/box_collection.dart';
-import 'package:vocab/widgets/box_collection.dart';
+import 'package:vocab/widgets/box_collection_widget.dart';
 
 class HomePage extends MaterialPage {
-  HomePage({ValueChanged<Box>? onBoxSelected,}) : super(
-    child: _Widget(onBoxSelected: onBoxSelected),
-  );
+  HomePage({
+    required Future<BoxCollection> boxCollectionFuture,
+    ValueChanged<Box>? onBoxSelected,
+  }) : super(
+          child: _Widget(
+            boxCollectionFuture: boxCollectionFuture,
+            onBoxSelected: onBoxSelected,
+          ),
+        );
 }
 
 class _Widget extends StatelessWidget {
   final ValueChanged<Box>? onBoxSelected;
+  final Future<BoxCollection> boxCollectionFuture;
 
-  const _Widget({this.onBoxSelected, Key? key,}) : super(key: key);
+  _Widget({
+    required this.boxCollectionFuture,
+    this.onBoxSelected,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
         // load box collection from json file
-        future: BoxCollection.load(),
+        future: boxCollectionFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            // create change notifier
             return ChangeNotifierProvider.value(
               value: snapshot.data as BoxCollection,
               builder: (context, child) => _mainScaffold(context),

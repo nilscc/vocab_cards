@@ -20,7 +20,6 @@ void main() {
     final d = PracticeCard.fromJson(jsonDecode(e));
 
     // original card and decoded card should be the same
-    expect(d.front, c.front);
-    expect(d.back, c.back);
+    expect(d, c);
   });
 }

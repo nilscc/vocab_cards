@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:vocab/cards/box.dart';
+import 'package:vocab/widgets/box_info_widget.dart';
+import 'package:vocab/widgets/practice_card_widget.dart';
 
 class PracticePage extends MaterialPage {
   PracticePage({required Box box, VoidCallback? onAddNewCard})
       : super(
           key: ValueKey(_KeyValue(box)),
-          child: _Child(box: box, onAddNewCard: onAddNewCard),
+          child: _Widget(box: box, onAddNewCard: onAddNewCard),
           maintainState: false,
         );
 }
@@ -15,11 +17,11 @@ class _KeyValue {
   _KeyValue(this.box);
 }
 
-class _Child extends StatelessWidget {
+class _Widget extends StatelessWidget {
   final Box box;
   final VoidCallback? onAddNewCard;
 
-  const _Child({
+  const _Widget({
     required this.box,
     this.onAddNewCard,
     Key? key,
@@ -33,6 +35,7 @@ class _Child extends StatelessWidget {
           'Practice',
         ),
       ),
+      body: _body(context),
       floatingActionButton: onAddNewCard == null
           ? null
           : FloatingActionButton(
@@ -41,4 +44,13 @@ class _Child extends StatelessWidget {
             ),
     );
   }
+
+  Widget _body(BuildContext context) => ListView(
+        padding: const EdgeInsets.only(top: 10),
+        children: [
+          BoxInfoWidget(box: box),
+          if (box.hasCards)
+            PracticeCardWidget(box: box),
+        ],
+      );
 }

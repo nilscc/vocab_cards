@@ -37,7 +37,6 @@ void main() {
     final d = Box.fromJson(jsonDecode(e));
 
     // compare decoded with original box
-    expect(d.name, b.name);
-    expect(d.stacks.length, b.stacks.length);
+    expect(d, b);
   });
 }

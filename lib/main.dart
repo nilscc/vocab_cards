@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:vocab/cards/box.dart';
+import 'package:vocab/cards/box_collection.dart';
 import 'package:vocab/pages/home_page.dart';
 import 'package:vocab/pages/new_card_page.dart';
 import 'package:vocab/pages/practice_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  runApp(MyApp(
+    boxCollectionFuture: BoxCollection.load(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final Future<BoxCollection> boxCollectionFuture;
+
+  const MyApp({
+    required this.boxCollectionFuture,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State createState() => _State();
@@ -19,8 +28,6 @@ class MyApp extends StatefulWidget {
 class _State extends State<MyApp> {
   Box? _selectedBox;
   bool _showAddNewCard = false;
-
-  // Callbacks for pages
 
   void _onBoxSelected(Box? box) {
     if (box != _selectedBox) {
@@ -47,7 +54,10 @@ class _State extends State<MyApp> {
       home: Navigator(
         // main pages
         pages: [
-          HomePage(onBoxSelected: _onBoxSelected),
+          HomePage(
+            boxCollectionFuture: widget.boxCollectionFuture,
+            onBoxSelected: _onBoxSelected,
+          ),
           if (_selectedBox != null)
             PracticePage(
               box: _selectedBox!,
@@ -55,8 +65,10 @@ class _State extends State<MyApp> {
             ),
           if (_selectedBox != null && _showAddNewCard)
             NewCardPage(
-              box: _selectedBox!,
-            ),
+                box: _selectedBox!,
+                save: () async {
+                  await (await widget.boxCollectionFuture).save();
+                }),
         ],
 
         onPopPage: (route, result) {
@@ -64,15 +76,15 @@ class _State extends State<MyApp> {
             return false;
           }
 
-          if (_selectedBox != null) {
-            setState(() {
+          setState(() {
+            if (_selectedBox != null) {
               if (_showAddNewCard) {
                 _showAddNewCard = false;
               } else {
                 _selectedBox = null;
               }
-            });
-          }
+            }
+          });
 
           return true;
         },

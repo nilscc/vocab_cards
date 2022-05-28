@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vocab/cards/practice_card.dart';
 
@@ -5,13 +6,28 @@ class Box extends ChangeNotifier {
   String name;
   Map<int, List<PracticeCard>> stacks;
 
-  @override
-  String toString() => 'Box(name: "$name", stacks: $stacks)';
-
   Box({
     required this.name,
     Map<int, List<PracticeCard>>? stacks,
   }) : stacks = stacks ?? {};
+
+  // Override String presentation
+
+  @override
+  String toString() => 'Box(name: "$name", stacks: $stacks)';
+
+  // Override comparison operator
+
+  @override
+  int get hashCode => Object.hash(Box, name, stacks);
+
+  @override
+  bool operator ==(Object other) =>
+      other is Box &&
+      name == other.name &&
+      const DeepCollectionEquality().equals(stacks, other.stacks);
+
+  // JSON encoder/decoder
 
   Map<String, dynamic> toJson() => {
         "name": name,
@@ -25,6 +41,8 @@ class Box extends ChangeNotifier {
               (v as List).map((e) => PracticeCard.fromJson(e)).toList(),
             ));
 
+  // Box API
+
   void shuffle({int? i}) {
     if (i != null) {
       stacks[i]?.shuffle();
@@ -35,5 +53,14 @@ class Box extends ChangeNotifier {
 
   Map<int, int> counts() {
     return stacks.map((key, value) => MapEntry(key, value.length));
+  }
+
+  bool get hasCards => counts().values.sum > 0;
+
+  void add(PracticeCard card, {int level = 1}) {
+    if (!stacks.containsKey(level)) {
+      stacks[level] = [];
+    }
+    stacks[level]?.add(card);
   }
 }

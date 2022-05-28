@@ -11,6 +11,15 @@ class PracticeCard extends ChangeNotifier {
   @override
   String toString() => 'PracticeCard(front: "$front", back: "$back")';
 
+  // Override comparison operator
+
+  @override
+  int get hashCode => Object.hash(PracticeCard, front, back);
+
+  @override
+  bool operator ==(Object other) =>
+      other is PracticeCard && front == other.front && back == other.back;
+
   // JSON encoder/decoder functions
 
   Map<String, dynamic> toJson() => {

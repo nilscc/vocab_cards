@@ -1,11 +1,15 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/swipe_cards.dart';
+import 'package:vocab/cards/box.dart';
 import 'package:vocab/widgets/painter/triangle.dart';
 import 'package:vocab/cards/practice_card.dart';
 
 class PracticeCardWidget extends StatefulWidget {
+  final Box box;
+
   const PracticeCardWidget({
+    required this.box,
     Key? key,
   }) : super(key: key);
 
@@ -14,36 +18,23 @@ class PracticeCardWidget extends StatefulWidget {
 }
 
 class _State extends State<PracticeCardWidget> {
-  late List<SwipeItem> _swipeItems;
-  late MatchEngine _matchEngine;
-
-  @override
-  void initState() {
-    _swipeItems = [
-      SwipeItem(
-        content: PracticeCard("test front", "test back"),
-      ),
-      SwipeItem(
-        content: PracticeCard("second card front", "second card back"),
-      ),
-    ];
-
-    _matchEngine = MatchEngine(swipeItems: _swipeItems);
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    final k = widget.box.stacks.keys.toList();
+    k.sort();
+    final c = widget.box.stacks[k.first];
+
+    final swipeItems = c?.map((c) => SwipeItem(content: c)).toList() ?? [];
+    final matchEngine = MatchEngine(swipeItems: swipeItems);
+
     return SizedBox(
       height: 264,
       child: SwipeCards(
-        matchEngine: _matchEngine,
-        onStackFinished: () {
-
-        },
+        matchEngine: matchEngine,
+        onStackFinished: () {},
         itemBuilder: (context, idx) {
-          return _card(context, _swipeItems[idx].content);
+          return _card(context, swipeItems[idx].content);
         },
         fillSpace: true,
       ),

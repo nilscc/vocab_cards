@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/cards/box_collection.dart';
-import 'package:vocab/widgets/box_info.dart';
+import 'package:vocab/widgets/box_info_widget.dart';
 
 class BoxCollectionWidget extends StatelessWidget {
   final ValueChanged<Box>? onBoxSelected;
