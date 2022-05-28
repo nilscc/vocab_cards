@@ -14,10 +14,15 @@ void main() async {
 class MyApp extends StatelessWidget {
   final Future<BoxCollection> boxCollectionFuture;
 
-  const MyApp({
+  MyApp({
     required this.boxCollectionFuture,
     Key? key,
-  }) : super(key: key);
+  })  : _myRouterDelegate = MyRouterDelegate(
+          boxCollectionFuture: boxCollectionFuture,
+        ),
+        super(key: key);
+
+  final MyRouterDelegate _myRouterDelegate;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +30,11 @@ class MyApp extends StatelessWidget {
       title: 'Vocab Cards',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      routerDelegate: MyRouterDelegate(
+      routerDelegate: _myRouterDelegate,
+      routeInformationParser: MyRouteInformationParser(
         boxCollectionFuture: boxCollectionFuture,
       ),
-      routeInformationParser: MyRouteInformationParser(),
+      restorationScopeId: "MyRouterState",
     );
   }
 }
