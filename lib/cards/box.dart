@@ -1,8 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:vocab/cards/practice_card.dart';
 
 class Box extends ChangeNotifier {
+  final key = GlobalKey();
+
   String name;
   Map<int, List<PracticeCard>> stacks;
 
