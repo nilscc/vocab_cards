@@ -9,21 +9,83 @@ import 'package:vocab/router/route.dart';
 
 class MyRouterDelegate extends RouterDelegate<MyRoute>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<MyRoute> {
+  /// Global navigator key
   final GlobalKey<NavigatorState> _navigatorKey;
-
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
-  Future<BoxCollection> boxCollectionFuture;
+  /// Main routing configuration
   MyRoute _currentConfiguration;
-
+  MyRoute get cfg => _currentConfiguration;
   @override
   MyRoute? get currentConfiguration => _currentConfiguration;
 
+  /// Future for retrieving current box collection, as it is loaded from disk.
+  Future<BoxCollection> boxCollectionFuture;
+
+  /// Constructor.
   MyRouterDelegate({
     required this.boxCollectionFuture,
-  }) : _navigatorKey = GlobalKey<NavigatorState>(),
-  _currentConfiguration = MyRoute();
+  })  : _navigatorKey = GlobalKey<NavigatorState>(),
+        _currentConfiguration = MyRoute();
+
+  // RouteDelegate implementations
+
+  @override
+  Future setInitialRoutePath(MyRoute configuration) {
+    _currentConfiguration = configuration;
+    return SynchronousFuture(null);
+  }
+
+  @override
+  Future setNewRoutePath(MyRoute configuration) {
+    _currentConfiguration = configuration;
+    return SynchronousFuture(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      onPopPage: _onPopPage,
+      pages: [
+        HomePage(
+          boxCollectionFuture: boxCollectionFuture,
+          onBoxSelected: _onBoxSelected,
+        ),
+        if (cfg.hasSelectedBox)
+          PracticePage(
+            box: cfg.selectedBox!,
+            onAddNewCard: _onAddNewCard,
+          ),
+        if (cfg.addNewCard)
+          NewCardPage(
+            box: cfg.selectedBox!,
+            save: () async {
+              await (await boxCollectionFuture).save();
+            },
+          ),
+      ],
+    );
+  }
+
+  bool _onPopPage(route, result) {
+    if (!route.didPop(result)) {
+      return false;
+    }
+
+    cfg.pop();
+    notifyListeners();
+
+    return true;
+  }
+
+  @override
+  Future<bool> popRoute() {
+    cfg.pop();
+    return SynchronousFuture(true);
+  }
+
+  // Routing callback for pages
 
   void _onBoxSelected(Box? box) {
     assert(currentConfiguration != null);
@@ -41,50 +103,5 @@ class MyRouterDelegate extends RouterDelegate<MyRoute>
       currentConfiguration?.addNewCard = true;
       notifyListeners();
     }
-  }
-
-  @override
-  Future setInitialRoutePath(MyRoute configuration) {
-    _currentConfiguration = configuration;
-    return SynchronousFuture(null);
-  }
-
-  @override
-  Future setNewRoutePath(MyRoute configuration) {
-    _currentConfiguration = configuration;
-    return SynchronousFuture(null);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      pages: [
-        HomePage(
-          boxCollectionFuture: boxCollectionFuture,
-          onBoxSelected: _onBoxSelected,
-        ),
-        if (currentConfiguration?.hasSelectedBox == true)
-          PracticePage(
-            box: (currentConfiguration?.selectedBox)!,
-            onAddNewCard: _onAddNewCard,
-          ),
-        if (currentConfiguration?.addNewCard == true)
-          NewCardPage(
-              box: (currentConfiguration?.selectedBox)!,
-              save: () async {
-                await (await boxCollectionFuture).save();
-              }),
-      ],
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) {
-          return false;
-        }
-
-        currentConfiguration?.pop();
-        notifyListeners();
-
-        return true;
-      },
-    );
   }
 }

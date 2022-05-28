@@ -8,7 +8,6 @@ class PracticePage extends MaterialPage {
       : super(
           key: ValueKey(_Key(box.key)),
           child: _Widget(box: box, onAddNewCard: onAddNewCard),
-          maintainState: false,
         );
 }
 
