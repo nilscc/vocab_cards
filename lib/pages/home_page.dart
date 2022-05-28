@@ -20,7 +20,7 @@ class _Widget extends StatelessWidget {
   final ValueChanged<Box>? onBoxSelected;
   final Future<BoxCollection> boxCollectionFuture;
 
-  _Widget({
+  const _Widget({
     required this.boxCollectionFuture,
     this.onBoxSelected,
     Key? key,
