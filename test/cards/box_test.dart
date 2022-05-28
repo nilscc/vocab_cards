@@ -8,16 +8,11 @@ void main() {
   test("Counts", () {
     final b = Box(name: "Test");
 
-    b.stacks[1] = [
-      PracticeCard("a", "b"),
-      PracticeCard("c", "d"),
-    ];
+    b.add(PracticeCard("a", "b"));
+    b.add(PracticeCard("c", "d"));
+    b.add(PracticeCard("e", "f"), level: 2);
 
-    b.stacks[2] = [
-      PracticeCard("e", "f"),
-    ];
-
-    final c = b.counts();
+    final c = b.totalCounts();
     expect(c[1], 2);
     expect(c[2], 1);
     expect(c[0], null);
@@ -26,9 +21,7 @@ void main() {
   test("Encode to and decode from JSON", () {
     final b = Box(name: "JSON");
 
-    b.stacks[1] = [
-      PracticeCard("a", "b"),
-    ];
+    b.practiceStack.addCard(PracticeCard("a", "b"));
 
     // encode
     final e = jsonEncode(b);

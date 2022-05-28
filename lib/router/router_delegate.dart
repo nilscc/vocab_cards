@@ -63,16 +63,19 @@ class MyRouterDelegate extends RouterDelegate<MyRoute>
           PracticePage(
             box: cfg.selectedBox!,
             onAddNewCard: _onAddNewCard,
+            save: _save,
           ),
         if (cfg.addNewCard)
           NewCardPage(
             box: cfg.selectedBox!,
-            save: () async {
-              await (await boxCollectionFuture).save();
-            },
+            save: _save,
           ),
       ],
     );
+  }
+
+  Future _save() async {
+    await (await boxCollectionFuture).save();
   }
 
   bool _onPopPage(route, result) {

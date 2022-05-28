@@ -1,15 +1,17 @@
+import 'package:collection/collection.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/widgets/painter/triangle.dart';
 import 'package:vocab/cards/practice_card.dart';
 
 class PracticeCardWidget extends StatefulWidget {
-  final Box box;
+  final VoidCallback save;
 
   const PracticeCardWidget({
-    required this.box,
+    required this.save,
     Key? key,
   }) : super(key: key);
 
@@ -18,32 +20,108 @@ class PracticeCardWidget extends StatefulWidget {
 }
 
 class _State extends State<PracticeCardWidget> {
-  int _currentItem = 0;
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final k = widget.box.stacks.keys.toList();
-    k.sort();
-    final c = widget.box.stacks[k.first];
+    final box = Provider.of<Box>(context, listen: false);
 
-    final swipeItems = c?.map((c) => SwipeItem(content: c)).toList() ?? [];
-    final matchEngine = MatchEngine(swipeItems: swipeItems);
+    if (!box.hasPracticeCards) {
+      return _noPracticeCards(box);
+    } else {
+      return Column(
+        children: [
+          _swipeCard(context),
+          ..._controls(context),
+        ],
+      );
+    }
+  }
 
-    return SizedBox(
-      height: 300,
-      child: SwipeCards(
-        matchEngine: matchEngine,
-        fillSpace: true,
-        itemBuilder: (context, idx) {
-          return _card(context, swipeItems[idx].content,
-              fade: idx != _currentItem);
+  List<Widget> _controls(BuildContext context) => [
+        _levelSelect(context),
+      ];
+
+  Widget _levelSelect(BuildContext context) {
+    return Container();
+  }
+
+  void _onStackFinished(Box box) {
+    setState((){});
+  }
+
+  Widget _noPracticeCards(Box box) {
+    if (box.totalCounts().values.sum == 0) {
+      return _noCards();
+    } else {
+      // show reset practice controls
+      return _resetPracticeControls(box);
+    }
+  }
+
+  Widget _noCards() => const Padding(
+        padding: EdgeInsets.all(20),
+        child: Text("No cards yet! Add some to start practicing."),
+      );
+
+  Widget _resetPracticeControls(Box box) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: ElevatedButton(
+        onPressed: () {
+          box.resetPractice();
+          widget.save();
+
+          setState(() {
+            _currentIndex = 0;
+          });
         },
-        onStackFinished: () {},
-        itemChanged: (item, index) {
-          _currentItem = index;
-        },
-      ),
+        child: Text("All done! Restart practice."),
+      )
     );
+  }
+
+  Widget _swipeCard(BuildContext context) {
+    final box = Provider.of<Box>(context, listen: false);
+
+    if (!box.hasPracticeCards) {
+      return _noCards();
+    } else {
+      final swipeItems = box.practiceStack
+          .allCards()
+          .map((card) => SwipeItem(
+                content: card,
+                likeAction: () {
+                  box.advanceTopCard();
+                  widget.save();
+                },
+                nopeAction: () {
+                  box.lowerTopCard();
+                  widget.save();
+                },
+              ))
+          .toList();
+
+      final matchEngine = MatchEngine(swipeItems: swipeItems);
+
+      return SizedBox(
+        height: 300,
+        child: SwipeCards(
+          matchEngine: matchEngine,
+          fillSpace: true,
+          itemBuilder: (context, idx) {
+            return _card(context, swipeItems[idx].content,
+                fade: idx != _currentIndex);
+          },
+          onStackFinished: () {
+            _onStackFinished(box);
+          },
+          itemChanged: (item, index) {
+            _currentIndex = index;
+          },
+        ),
+      );
+    }
   }
 
   Widget _card(BuildContext context, PracticeCard card, {bool fade = false}) {

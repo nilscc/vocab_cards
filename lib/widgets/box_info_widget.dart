@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vocab/cards/box.dart';
 
 class BoxInfoWidget extends StatelessWidget {
-  final Box box;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
   const BoxInfoWidget({
-    required this.box,
     this.onTap,
     this.onLongPress,
     Key? key,
@@ -15,12 +14,14 @@ class BoxInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = Provider.of<Box>(context);
+
     // get text styles
     final th = Theme.of(context);
     final tt = th.textTheme;
 
     // lookup box counts
-    final counts = box.counts();
+    final counts = box.totalCounts();
     counts.removeWhere((key, value) => value <= 0);
 
     // sort stack levels

@@ -24,10 +24,13 @@ class BoxCollectionWidget extends StatelessWidget {
     } else {
       return ListView(
         children: bc.boxes
-            .map((e) => BoxInfoWidget(
-                  box: e,
-                  onTap: () => onBoxSelected?.call(e),
-                ))
+            .map(
+              (e) => ChangeNotifierProvider.value(
+                  value: e,
+                  child: BoxInfoWidget(
+                    onTap: () => onBoxSelected?.call(e),
+                  )),
+            )
             .toList(),
       );
     }

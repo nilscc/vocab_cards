@@ -1,68 +1,100 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:vocab/cards/card_stack.dart';
 import 'package:vocab/cards/practice_card.dart';
 
 class Box extends ChangeNotifier {
   final key = GlobalKey();
 
   String name;
-  Map<int, List<PracticeCard>> stacks;
+
+  CardStack practiceStack;
+  CardStack advanceStack;
 
   Box({
     required this.name,
     Map<int, List<PracticeCard>>? stacks,
-  }) : stacks = stacks ?? {};
+  })  : practiceStack = CardStack(cards: stacks ?? {}),
+        advanceStack = CardStack();
 
   // Override String presentation
 
   @override
-  String toString() => 'Box(name: "$name", stacks: $stacks)';
+  String toString() => 'Box(name: "$name", stacks: $practiceStack)';
 
   // Override comparison operator
 
   @override
-  int get hashCode => Object.hash(Box, name, stacks);
+  int get hashCode => Object.hash(Box, name, practiceStack);
 
   @override
   bool operator ==(Object other) =>
       other is Box &&
       name == other.name &&
-      const DeepCollectionEquality().equals(stacks, other.stacks);
+      const DeepCollectionEquality().equals(practiceStack, other.practiceStack);
 
   // JSON encoder/decoder
 
   Map<String, dynamic> toJson() => {
         "name": name,
-        "stacks": stacks.map((k, v) => MapEntry(k.toString(), v)),
+        "practiceStack": practiceStack.toJson(),
+        "advanceStack": advanceStack.toJson(),
       };
 
   Box.fromJson(Map<String, dynamic> map)
       : name = map["name"],
-        stacks = (map["stacks"] as Map).map((k, v) => MapEntry(
-              int.parse(k),
-              (v as List).map((e) => PracticeCard.fromJson(e)).toList(),
-            ));
+        practiceStack = CardStack.fromJson(map["practiceStack"] ?? {}),
+        advanceStack = CardStack.fromJson(map["advanceStack"] ?? {});
 
   // Box API
 
   void shuffle({int? i}) {
     if (i != null) {
-      stacks[i]?.shuffle();
+      practiceStack.cards[i]?.shuffle();
     } else {
-      stacks.forEach((key, value) => value.shuffle());
+      practiceStack.cards.forEach((key, value) => value.shuffle());
     }
   }
 
-  Map<int, int> counts() {
-    return stacks.map((key, value) => MapEntry(key, value.length));
+  /// Count all cards combined from the practice, advance and lower stacks.
+  Map<int, int> totalCounts() {
+    var cs = CardStack();
+    cs.appendAll(practiceStack);
+    cs.appendAll(advanceStack);
+    return cs.counts();
   }
 
-  bool get hasCards => counts().values.sum > 0;
+  bool get hasPracticeCards => practiceStack.counts().values.sum > 0;
 
   void add(PracticeCard card, {int level = 1}) {
-    if (!stacks.containsKey(level)) {
-      stacks[level] = [];
+    practiceStack.addCard(card, level: level);
+    notifyListeners();
+  }
+
+  /// Advance top card on given stack to next level
+  void advanceTopCard() {
+    final tpl = practiceStack.popCard();
+    if (tpl != null) {
+      advanceStack.addCard(tpl.item1, level: tpl.item2 + 1);
+      notifyListeners();
     }
-    stacks[level]?.add(card);
+  }
+
+  /// Lower top card on given stack to previous level (or move to back of level 1)
+  void lowerTopCard() {
+    final tpl = practiceStack.popCard();
+    if (tpl != null) {
+      advanceStack.addCard(tpl.item1, level: max(1, tpl.item2 - 1));
+      notifyListeners();
+    }
+  }
+
+  /// Reset practice and merge all advanced and lowered cards into the practice stack.
+  void resetPractice() {
+    practiceStack.appendAll(advanceStack);
+    advanceStack = CardStack();
+    notifyListeners();
   }
 }

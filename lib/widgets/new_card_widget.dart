@@ -2,17 +2,16 @@ import 'dart:async';
 
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/cards/practice_card.dart';
 
 typedef FutureCallback = Future Function();
 
 class NewCardWidget extends StatelessWidget {
-  final Box box;
   final FutureCallback? save;
 
   NewCardWidget({
-    required this.box,
     this.save,
     Key? key,
   }) : super(key: key);
@@ -21,7 +20,7 @@ class NewCardWidget extends StatelessWidget {
   final _wordInputController = TextEditingController();
   final _translationInputController = TextEditingController();
 
-  void _addCard() async {
+  void _addCard(Box box) async {
     box.add(PracticeCard(
       _wordInputController.text,
       _translationInputController.text,
@@ -38,6 +37,8 @@ class NewCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = Provider.of<Box>(context);
+
     return ListView(
       children: [
         const ListTile(
@@ -69,7 +70,7 @@ class NewCardWidget extends StatelessWidget {
               icon: Icon(FeatherIcons.info),
             ),
             onSubmitted: (value) {
-              _addCard();
+              _addCard(box);
             },
           ),
         ),
@@ -86,7 +87,7 @@ class NewCardWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 20),
                   child: ElevatedButton(
                     onPressed: () {
-                      _addCard();
+                      _addCard(box);
                     },
                     child: const Text("Save Card"),
                   ),
