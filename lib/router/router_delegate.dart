@@ -44,6 +44,13 @@ class MyRouterDelegate extends RouterDelegate<MyRoute>
   }
 
   @override
+  Future setRestoredRoutePath(MyRoute configuration) {
+    _currentConfiguration = configuration;
+    return SynchronousFuture(null);
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Navigator(
       onPopPage: _onPopPage,
