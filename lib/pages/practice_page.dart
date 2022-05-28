@@ -6,15 +6,15 @@ import 'package:vocab/widgets/practice_card_widget.dart';
 class PracticePage extends MaterialPage {
   PracticePage({required Box box, VoidCallback? onAddNewCard})
       : super(
-          key: ValueKey(_Key(box.key)),
+          key: ValueKey("PracticePage: ${box.name}"),
           child: _Widget(box: box, onAddNewCard: onAddNewCard),
         );
 }
 
-class _Key {
-  final GlobalKey key;
-  const _Key(this.key);
-}
+// class _Key {
+//   final GlobalKey key;
+//   const _Key(this.key);
+// }
 
 class _Widget extends StatelessWidget {
   final Box box;
@@ -48,8 +48,7 @@ class _Widget extends StatelessWidget {
         padding: const EdgeInsets.only(top: 10),
         children: [
           BoxInfoWidget(box: box),
-          if (box.hasCards)
-            PracticeCardWidget(box: box),
+          if (box.hasCards) PracticeCardWidget(box: box),
         ],
       );
 }
