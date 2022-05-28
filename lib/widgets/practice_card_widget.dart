@@ -5,7 +5,7 @@ import 'package:vocab/cards/box.dart';
 import 'package:vocab/widgets/painter/triangle.dart';
 import 'package:vocab/cards/practice_card.dart';
 
-class PracticeCardWidget extends StatefulWidget {
+class PracticeCardWidget extends StatelessWidget {
   final Box box;
 
   const PracticeCardWidget({
@@ -14,29 +14,23 @@ class PracticeCardWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State createState() => _State();
-}
-
-class _State extends State<PracticeCardWidget> {
-  @override
   Widget build(BuildContext context) {
-
-    final k = widget.box.stacks.keys.toList();
+    final k = box.stacks.keys.toList();
     k.sort();
-    final c = widget.box.stacks[k.first];
+    final c = box.stacks[k.first];
 
     final swipeItems = c?.map((c) => SwipeItem(content: c)).toList() ?? [];
     final matchEngine = MatchEngine(swipeItems: swipeItems);
 
     return SizedBox(
-      height: 264,
+      height: 300,
       child: SwipeCards(
         matchEngine: matchEngine,
-        onStackFinished: () {},
+        fillSpace: true,
         itemBuilder: (context, idx) {
           return _card(context, swipeItems[idx].content);
         },
-        fillSpace: true,
+        onStackFinished: () {},
       ),
     );
   }
@@ -60,9 +54,10 @@ class _State extends State<PracticeCardWidget> {
     bool front = true,
   }) {
     final theme = Theme.of(context);
+    final tt = theme.textTheme;
+
     return Card(
       color: front ? Colors.amber.shade800 : Colors.green.shade800,
-      elevation: 0,
       child: Column(
         children: [
           Row(
@@ -80,17 +75,20 @@ class _State extends State<PracticeCardWidget> {
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.only(
-              top: 70,
-              bottom: 100,
-              left: 100,
-              right: 100,
-            ),
-            alignment: AlignmentDirectional.center,
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.white),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 0,
+                bottom: 30,
+                left: 30,
+                right: 30,
+              ),
+              alignment: AlignmentDirectional.center,
+              child: Text(
+                text,
+                style: tt.caption?.copyWith(color: Colors.white, fontSize: 18),
+                overflow: TextOverflow.fade,
+              ),
             ),
           ),
         ],

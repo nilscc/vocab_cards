@@ -39,4 +39,15 @@ void main() {
     // compare decoded with original box
     expect(d, b);
   });
+
+  test("Keys", () {
+    final b = Box(name: "test");
+    final k1 = b.key;
+
+    b.add(PracticeCard("a", "b"));
+
+    final k2 = b.key;
+
+    expect(k2, k1);
+  });
 }

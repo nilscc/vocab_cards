@@ -11,14 +11,8 @@ class NewCardPage extends MaterialPage {
             box: box,
             save: save,
           ),
-          key: ValueKey(_KeyValue(box)),
           maintainState: false,
         );
-}
-
-class _KeyValue {
-  final GlobalKey key;
-  _KeyValue(Box box) : key = box.key;
 }
 
 class _Widget extends StatelessWidget {
