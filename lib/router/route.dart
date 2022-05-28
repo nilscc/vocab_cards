@@ -1,6 +1,11 @@
 import 'package:vocab/cards/box.dart';
 
 class MyRoute {
+
+  // Override toString
+  @override
+  String toString() => 'MyRoute(selectedBox = $selectedBox, addNewCard = $addNewCard)';
+
   /// Whether or not we currently have a box of cards selected
   Box? selectedBox;
 
