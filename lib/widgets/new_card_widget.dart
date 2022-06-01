@@ -21,12 +21,14 @@ class NewCardWidget extends StatelessWidget {
   final _translationInputController = TextEditingController();
 
   void _addCard(Box box) async {
-    box.add(PracticeCard(
-      _wordInputController.text,
-      _translationInputController.text,
-    ));
-    await save?.call();
-    _resetInputs();
+    final front = _wordInputController.text.trim();
+    final back = _translationInputController.text.trim();
+
+    if (front.isNotEmpty && back.isNotEmpty) {
+      box.add(PracticeCard(front, back));
+      await save?.call();
+      _resetInputs();
+    }
   }
 
   void _resetInputs() {
