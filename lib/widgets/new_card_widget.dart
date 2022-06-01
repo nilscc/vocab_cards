@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:translator/translator.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/cards/practice_card.dart';
+import 'package:vocab/config.dart';
 
 typedef FutureCallback = Future Function();
 
@@ -59,6 +61,15 @@ class NewCardWidget extends StatelessWidget {
               border: OutlineInputBorder(),
               icon: Icon(FeatherIcons.helpCircle),
             ),
+            onSubmitted: (text) async {
+              final c = Provider.of<Config>(context, listen: false).configTranslator;
+              final t = GoogleTranslator();
+              final w = await t.translate(text, from: c.from, to: c.to);
+              if (_translationInputController.text.isEmpty) {
+                _translationInputController.text = w.text;
+                _translationInputController.selection = TextSelection(baseOffset: 0, extentOffset: w.text.length);
+              }
+            },
           ),
         ),
         Padding(

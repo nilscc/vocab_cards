@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vocab/cards/box_collection.dart';
+import 'package:vocab/config.dart';
 import 'package:vocab/router/route_information_parser.dart';
 import 'package:vocab/router/router_delegate.dart';
 
@@ -26,15 +28,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Vocab Cards',
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      routerDelegate: _myRouterDelegate,
-      routeInformationParser: MyRouteInformationParser(
-        boxCollectionFuture: boxCollectionFuture,
+    return ChangeNotifierProvider(
+      create: (context) => Config(),
+      child: MaterialApp.router(
+        title: 'Vocab Cards',
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        routerDelegate: _myRouterDelegate,
+        routeInformationParser: MyRouteInformationParser(
+          boxCollectionFuture: boxCollectionFuture,
+        ),
+        restorationScopeId: "MyRouterState",
       ),
-      restorationScopeId: "MyRouterState",
     );
   }
 }
