@@ -7,6 +7,15 @@ class PracticeControlsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = Provider.of<Box>(context, listen: false);
+    if (box.hasPracticeCards || box.hasAdvancedCards) {
+      return _controls(context);
+    } else {
+      return Container();
+    }
+  }
+
+  Widget _controls(BuildContext context) {
     final th = Theme.of(context).textTheme;
 
     return Padding(
