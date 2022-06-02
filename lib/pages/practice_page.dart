@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:vocab/cards/box.dart';
 import 'package:vocab/widgets/box_info_widget.dart';
 import 'package:vocab/widgets/practice_card_widget.dart';
+import 'package:vocab/widgets/practice_controls_widget.dart';
 
 class PracticePage extends MaterialPage {
   PracticePage({
@@ -54,6 +55,7 @@ class _Widget extends StatelessWidget {
         children: [
           const BoxInfoWidget(),
           PracticeCardWidget(save: save),
+          const PracticeControlsWidget(),
         ],
       );
 }

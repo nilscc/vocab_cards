@@ -69,13 +69,13 @@ class CardStack {
     return cards.map((key, value) => MapEntry(key, value.length));
   }
 
-  List<PracticeCard> allCards() {
+  List<PracticeCard> allCards({int? limit}) {
     final r = <PracticeCard>[];
     final k = cards.keys.toList();
     k.sort();
     for (final l in k) {
       r.addAll(cards[l]!);
     }
-    return r;
+    return r.sublist(0, limit);
   }
 }

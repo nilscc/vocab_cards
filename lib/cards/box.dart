@@ -50,11 +50,14 @@ class Box extends ChangeNotifier {
 
   // Box API
 
-  void shuffle({int? i}) {
+  void shuffle({int? i, bool notify = true}) {
     if (i != null) {
       practiceStack.cards[i]?.shuffle();
     } else {
       practiceStack.cards.forEach((key, value) => value.shuffle());
+    }
+    if (notify) {
+      notifyListeners();
     }
   }
 
@@ -67,34 +70,43 @@ class Box extends ChangeNotifier {
   }
 
   bool get hasPracticeCards => practiceStack.counts().values.sum > 0;
+  bool get hasAdvancedCards => advanceStack.counts().values.sum > 0;
 
-  void add(PracticeCard card, {int level = 1}) {
+  void add(PracticeCard card, {int level = 1, bool notify = true}) {
     practiceStack.addCard(card, level: level);
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   /// Advance top card on given stack to next level
-  void advanceTopCard() {
+  void advanceTopCard({bool notify = true}) {
     final tpl = practiceStack.popCard();
     if (tpl != null) {
       advanceStack.addCard(tpl.item1, level: tpl.item2 + 1);
-      notifyListeners();
+      if (notify) {
+        notifyListeners();
+      }
     }
   }
 
   /// Lower top card on given stack to previous level (or move to back of level 1)
-  void lowerTopCard() {
+  void lowerTopCard({bool notify = true}) {
     final tpl = practiceStack.popCard();
     if (tpl != null) {
       advanceStack.addCard(tpl.item1, level: max(1, tpl.item2 - 1));
-      notifyListeners();
+      if (notify) {
+        notifyListeners();
+      }
     }
   }
 
   /// Reset practice and merge all advanced and lowered cards into the practice stack.
-  void resetPractice() {
+  void resetPractice({bool notify = true}) {
     practiceStack.appendAll(advanceStack);
     advanceStack = CardStack();
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 }

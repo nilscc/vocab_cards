@@ -24,10 +24,10 @@ class _State extends State<PracticeCardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final box = Provider.of<Box>(context, listen: false);
+    final box = Provider.of<Box>(context);
 
     if (!box.hasPracticeCards) {
-      return _noPracticeCards(box);
+      return _noPracticeCards(context, box);
     } else {
       return Column(
         children: [
@@ -46,16 +46,23 @@ class _State extends State<PracticeCardWidget> {
     return Container();
   }
 
-  void _onStackFinished(Box box) {
-    setState((){});
+  void _reset() {
+    setState(() {
+      _currentIndex = 0;
+      _matchEngine = null;
+      _swipeItems = null;
+      _swipeCardsKey = GlobalKey();
+    });
   }
 
-  Widget _noPracticeCards(Box box) {
+  void _onStackFinished(Box box) => _reset();
+
+  Widget _noPracticeCards(BuildContext context, Box box) {
     if (box.totalCounts().values.sum == 0) {
       return _noCards();
     } else {
       // show reset practice controls
-      return _resetPracticeControls(box);
+      return _resetPracticeControls(context);
     }
   }
 
@@ -64,30 +71,29 @@ class _State extends State<PracticeCardWidget> {
         child: Text("No cards yet! Add some to start practicing."),
       );
 
-  Widget _resetPracticeControls(Box box) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: ElevatedButton(
-        onPressed: () {
-          box.resetPractice();
-          widget.save();
+  Widget _resetPracticeControls(BuildContext context) {
+    final th = Theme.of(context).textTheme;
 
-          setState(() {
-            _currentIndex = 0;
-          });
-        },
-        child: Text("All done! Restart practice."),
-      )
+    return Container(
+      padding: const EdgeInsets.all(30),
+      child: Text(
+        "Well done! All cards finished.",
+        style: th.titleMedium,
+      ),
     );
   }
 
-  Widget _swipeCard(BuildContext context) {
-    final box = Provider.of<Box>(context, listen: false);
+  List<SwipeItem>? _swipeItems;
+  MatchEngine? _matchEngine;
+  GlobalKey? _swipeCardsKey;
 
-    if (!box.hasPracticeCards) {
-      return _noCards();
-    } else {
-      final swipeItems = box.practiceStack
+  Widget _swipeCard(BuildContext context) {
+    final box = Provider.of<Box>(context);
+
+    if (!box.hasAdvancedCards) {
+      _reset();
+
+      _swipeItems = box.practiceStack
           .allCards()
           .map((card) => SwipeItem(
                 content: card,
@@ -102,15 +108,20 @@ class _State extends State<PracticeCardWidget> {
               ))
           .toList();
 
-      final matchEngine = MatchEngine(swipeItems: swipeItems);
+      _matchEngine = MatchEngine(swipeItems: _swipeItems);
+    }
 
+    if (!box.hasPracticeCards) {
+      return _noCards();
+    } else {
       return SizedBox(
         height: 300,
         child: SwipeCards(
-          matchEngine: matchEngine,
+          key: _swipeCardsKey,
+          matchEngine: _matchEngine!,
           fillSpace: true,
           itemBuilder: (context, idx) {
-            return _card(context, swipeItems[idx].content,
+            return _card(context, _swipeItems![idx].content,
                 fade: idx != _currentIndex);
           },
           onStackFinished: () {
