@@ -65,6 +65,8 @@ class CardStack {
     }
   }
 
+  /// Count number of cards in each level.
+  /// Returns a map with the level as its key and the number of cards in the current level as its value.
   Map<int, int> counts() {
     return cards.map((key, value) => MapEntry(key, value.length));
   }

@@ -60,7 +60,9 @@ class _Widget extends StatelessWidget {
         appBar: _appBar(),
         body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
-          child: BoxCollectionWidget(onBoxSelected: onBoxSelected),
+          child: BoxCollectionWidget(
+            onBoxSelected: onBoxSelected,
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),

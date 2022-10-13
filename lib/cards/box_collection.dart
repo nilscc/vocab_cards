@@ -71,4 +71,9 @@ class BoxCollection extends ChangeNotifier {
     boxes.add(box);
     notifyListeners();
   }
+
+  void remove(Box box) {
+    boxes.remove(box);
+    notifyListeners();
+  }
 }

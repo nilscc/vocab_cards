@@ -29,10 +29,50 @@ class BoxCollectionWidget extends StatelessWidget {
                   value: e,
                   child: BoxInfoWidget(
                     onTap: () => onBoxSelected?.call(e),
+                    onLongPress: () => _confirmDelete(context, e),
                   )),
             )
             .toList(),
       );
     }
+  }
+
+  void _confirmDelete(BuildContext context, Box box) {
+    final bc = Provider.of<BoxCollection>(context, listen: false);
+
+    String t;
+
+    final c = box.count();
+    if (c == 0) {
+      t = 'The box is currently empty.';
+    } else {
+      t = 'All $c cards will be deleted and all learning progress lost.';
+    }
+
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Delete Box "${box.name}"?'),
+              content: Text(t),
+              actions: [
+                // Discard button
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Discard'),
+                ),
+                // Delete button
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                  ),
+                  child: const Text("Delete"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    bc.remove(box);
+                    bc.save(); // async, but drop to background
+                  },
+                ),
+              ],
+            ));
   }
 }

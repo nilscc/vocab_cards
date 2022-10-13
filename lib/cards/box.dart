@@ -69,6 +69,11 @@ class Box extends ChangeNotifier {
     return cs.counts();
   }
 
+  /// Count total number of cards
+  int count() {
+    return totalCounts().values.sum;
+  }
+
   bool get hasPracticeCards => practiceStack.counts().values.sum > 0;
   bool get hasAdvancedCards => advanceStack.counts().values.sum > 0;
 
