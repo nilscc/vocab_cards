@@ -37,6 +37,7 @@ class PracticeControlsWidget extends StatelessWidget {
 
   List<Widget> _editControls(context) {
     final th = Theme.of(context).textTheme;
+    final box = Provider.of<Box>(context, listen: false);
 
     return [
       Text(
@@ -53,10 +54,36 @@ class PracticeControlsWidget extends StatelessWidget {
               child: Text('Edit'),
             ),
             TextButton(
-              child: Text('Delete'),
+              child: const Text('Delete'),
               onPressed: () {
-                final box = Provider.of<Box>(context, listen: false);
-                box.removeTopCard();
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Delete Card?'),
+                      content: const Text('This cannot be undone.'),
+                      actions: [
+                        // Discard button
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        // Delete button
+                        ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.red),
+                          ),
+                          child: const Text("Delete"),
+                          onPressed: () {
+                            box.removeTopCard();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
             ),
           ],

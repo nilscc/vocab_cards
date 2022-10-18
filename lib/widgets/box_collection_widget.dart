@@ -58,7 +58,7 @@ class BoxCollectionWidget extends StatelessWidget {
                 // Discard button
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Discard'),
+                  child: const Text('Cancel'),
                 ),
                 // Delete button
                 ElevatedButton(
