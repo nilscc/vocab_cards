@@ -114,4 +114,12 @@ class Box extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Remove card
+  void removeTopCard({bool notify = true}) {
+    final tpl = practiceStack.popCard();
+    if (tpl != null && notify) {
+      notifyListeners();
+    }
+  }
 }

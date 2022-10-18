@@ -21,11 +21,16 @@ class PracticeCardWidget extends StatefulWidget {
 
 class _State extends State<PracticeCardWidget> {
   int? _currentIndex;
-  int? _count;
+  int? _countPractice;
+  int? _countAdvanced;
 
   @override
   Widget build(BuildContext context) {
     final box = Provider.of<Box>(context);
+
+    if (_swipeItems == null || !box.hasAdvancedCards || box.count() != _count) {
+      _setupMatchEngine(box);
+    }
 
     if (!box.hasPracticeCards) {
       return _noPracticeCards(context, box);
@@ -39,16 +44,20 @@ class _State extends State<PracticeCardWidget> {
     }
   }
 
+  int get _count => (_countPractice ?? 0) + (_countAdvanced ?? 0);
+
   Widget _progressCounter(BuildContext context) {
     final th = Theme.of(context).textTheme;
 
-    if (_currentIndex != null && _count != null) {
+    if (_currentIndex != null && _countPractice != null) {
+      final idx = (_currentIndex ?? 0) + 1 + (_countAdvanced ?? 0);
+      final count = (_countAdvanced ?? 0) + (_countPractice ?? 0);
       return Padding(
         padding: const EdgeInsets.only(top: 10, left: 30, right: 30),
         child: Align(
           alignment: AlignmentDirectional.topStart,
           child: Text(
-            "Card ${(_currentIndex ?? 0) + 1} of $_count:",
+            "Card $idx of $count:",
             style: th.caption,
           ),
         ),
@@ -61,7 +70,8 @@ class _State extends State<PracticeCardWidget> {
   void _reset() {
     setState(() {
       _currentIndex = null;
-      _count = null;
+      _countPractice = null;
+      _countAdvanced = null;
       _matchEngine = null;
       _swipeItems = null;
       _swipeCardsKey = GlobalKey();
@@ -102,56 +112,54 @@ class _State extends State<PracticeCardWidget> {
   MatchEngine? _matchEngine;
   GlobalKey? _swipeCardsKey;
 
+  void _setupMatchEngine(Box box) {
+    _reset();
+
+    final practiceCards = box.practiceStack.allCards();
+    final advancedCards = box.advanceStack.allCards();
+
+    _currentIndex = 0;
+    _countPractice = practiceCards.length;
+    _countAdvanced = advancedCards.length;
+
+    _swipeItems = practiceCards
+        .map((card) => SwipeItem(
+              content: card,
+              likeAction: () {
+                box.advanceTopCard();
+                widget.save();
+              },
+              nopeAction: () {
+                box.lowerTopCard();
+                widget.save();
+              },
+            ))
+        .toList();
+
+    _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
   Widget _swipeCard(BuildContext context) {
     final box = Provider.of<Box>(context);
 
-    if (!box.hasPracticeCards) {
-      return _noCards();
-    } else {
-      if (_swipeItems == null || !box.hasAdvancedCards) {
-        _reset();
-
-        final all = box.practiceStack.allCards();
-
-        _currentIndex = 0;
-        _count = all.length;
-
-        _swipeItems = all
-            .map((card) => SwipeItem(
-                  content: card,
-                  likeAction: () {
-                    box.advanceTopCard();
-                    widget.save();
-                  },
-                  nopeAction: () {
-                    box.lowerTopCard();
-                    widget.save();
-                  },
-                ))
-            .toList();
-
-        _matchEngine = MatchEngine(swipeItems: _swipeItems);
-      }
-
-      return SizedBox(
-        height: 300,
-        child: SwipeCards(
-          key: _swipeCardsKey,
-          matchEngine: _matchEngine!,
-          fillSpace: true,
-          itemBuilder: (context, idx) {
-            return _card(context, _swipeItems![idx].content,
-                fade: idx != _currentIndex);
-          },
-          onStackFinished: () {
-            _onStackFinished(box);
-          },
-          itemChanged: (item, index) {
-            _currentIndex = index;
-          },
-        ),
-      );
-    }
+    return SizedBox(
+      height: 300,
+      child: SwipeCards(
+        key: _swipeCardsKey,
+        matchEngine: _matchEngine!,
+        fillSpace: true,
+        itemBuilder: (context, idx) {
+          return _card(context, _swipeItems![idx].content,
+              fade: idx != _currentIndex);
+        },
+        onStackFinished: () {
+          _onStackFinished(box);
+        },
+        itemChanged: (item, index) {
+          _currentIndex = index;
+        },
+      ),
+    );
   }
 
   Widget _card(BuildContext context, PracticeCard card, {bool fade = false}) {
